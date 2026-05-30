@@ -36,6 +36,7 @@ jobs:
 
       - name: Upgrade Wrangler & Prepare Migrations
         run: |
+          pnpm add -D @cloudflare/next-on-pages@latest
           # 安装 wrangler@4 作为开发依赖
           pnpm add -D wrangler@4
           # 创建 migrations 目录
