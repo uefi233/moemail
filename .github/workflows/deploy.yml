@@ -12,13 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Get full git history for checking file changes
+          fetch-depth: 0
 
       - name: Get previous tag
         id: previoustag
         if: github.event_name == 'push'
-        run: |
-          echo "tag=$(git describe --tags --abbrev=0 HEAD^)" >> $GITHUB_OUTPUT
+        run: echo "tag=$(git describe --tags --abbrev=0 HEAD^)" >> $GITHUB_OUTPUT
         continue-on-error: true
 
       - name: Setup pnpm
@@ -34,6 +33,28 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Setup D1 Migrations
+        run: |
+          # 安装 wrangler@4 作为开发依赖
+          pnpm add -D wrangler@4
+
+          # 创建 migrations 目录
+          mkdir -p migrations
+
+          # 如果没有迁移文件，创建一个初始示例（根据你的实际 schema 修改）
+          if [ ! "$(ls -A migrations 2>/dev/null)" ]; then
+            cat > migrations/0001_init.sql << 'EOF'
+-- Initial schema for your D1 database
+-- Replace with your actual CREATE TABLE statements
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY,
+  name TEXT
+);
+-- Add other tables as needed
+EOF
+            echo "Created initial migration file at migrations/0001_init.sql"
+          fi
 
       - name: Run deploy script
         env:
@@ -52,8 +73,5 @@ jobs:
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
         run: pnpm dlx tsx scripts/deploy/index.ts
 
-      # Clean up
       - name: Post deployment cleanup
-        run: |
-          rm -f .env*.*
-          rm -f wrangler*.json
+        run: rm -f .env*.* wrangler*.json
