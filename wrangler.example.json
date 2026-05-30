@@ -18,4 +18,5 @@
       "id": "${KV_NAMESPACE_ID}"
     }
   ]
+  "pages_build_output_dir": ".vercel/output/static"
 }
