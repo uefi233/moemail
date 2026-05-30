@@ -34,26 +34,21 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Setup D1 Migrations
+      - name: Upgrade Wrangler & Prepare Migrations
         run: |
           # 安装 wrangler@4 作为开发依赖
           pnpm add -D wrangler@4
-
           # 创建 migrations 目录
           mkdir -p migrations
-
-          # 如果没有迁移文件，创建一个初始示例（根据你的实际 schema 修改）
+          # 如果没有迁移文件，创建一个占位（避免 wrangler 报错）
           if [ ! "$(ls -A migrations 2>/dev/null)" ]; then
-            cat > migrations/0001_init.sql << 'EOF'
--- Initial schema for your D1 database
--- Replace with your actual CREATE TABLE statements
-CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY,
-  name TEXT
-);
--- Add other tables as needed
-EOF
-            echo "Created initial migration file at migrations/0001_init.sql"
+            echo "-- Initial schema for D1 database" > migrations/0001_init.sql
+            echo "CREATE TABLE IF NOT EXISTS users (" >> migrations/0001_init.sql
+            echo "  id INTEGER PRIMARY KEY," >> migrations/0001_init.sql
+            echo "  name TEXT" >> migrations/0001_init.sql
+            echo ");" >> migrations/0001_init.sql
+            echo "-- 在此添加你的其他表结构" >> migrations/0001_init.sql
+            echo "Created initial migration file."
           fi
 
       - name: Run deploy script
