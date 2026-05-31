@@ -18,17 +18,23 @@ const KV_NAMESPACE_NAME = process.env.KV_NAMESPACE_NAME || "moemail-kv";
 const CUSTOM_DOMAIN = process.env.CUSTOM_DOMAIN;
 const KV_NAMESPACE_ID = process.env.KV_NAMESPACE_ID;
 
-/**
- * 验证必要的环境变量
- */
-const validateEnvironment = () => {
-  const requiredEnvVars = ["CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN"];
-  const missing = requiredEnvVars.filter((varName) => !process.env[varName]);
-
-  if (missing.length > 0) {
-    throw new Error(
-      `Missing required environment variables: ${missing.join(", ")}`
-    );
+const deployPages = () => {
+  console.log("🚧 Deploying to Cloudflare Pages...");
+  try {
+    const output = execSync("pnpm run deploy:pages", {
+      stdio: "pipe",
+      encoding: "utf-8",
+      env: process.env,   // 正常传递，不会打印
+    });
+    console.log(output);
+    console.log("✅ Pages deployment completed successfully");
+  } catch (error: any) {
+    // 只打印命令的 stdout/stderr，这些通常不包含 secret（除非你刻意输出）
+    console.error("❌ Pages deployment failed:");
+    console.error("stdout:", error.stdout?.toString());
+    console.error("stderr:", error.stderr?.toString());
+    console.error("exit code:", error.status);
+    throw error;
   }
 };
 
